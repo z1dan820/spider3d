@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spider-Man Hologram</title>
+    <title>Spider-Man Hologram 3D</title>
     <style>
         * {
             margin: 0;
@@ -13,103 +13,60 @@
 
         body {
             font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            background: #000;
             color: white;
             min-height: 100vh;
-            overflow-x: hidden;
+            overflow: hidden;
         }
 
         .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .header h1 {
-            color: #e23636;
-            font-size: 2.5rem;
-            text-shadow: 0 0 10px rgba(226, 54, 54, 0.5);
-            margin-bottom: 10px;
-        }
-
-        .main-content {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 30px;
-            margin-bottom: 30px;
+            height: 100vh;
         }
 
         @media (max-width: 768px) {
-            .main-content {
+            .container {
                 grid-template-columns: 1fr;
+                grid-template-rows: 1fr 1fr;
             }
         }
 
-        /* Hologram Display */
-        .hologram-container {
-            position: relative;
-            background: rgba(0, 0, 0, 0.7);
-            border-radius: 15px;
-            padding: 20px;
-            border: 2px solid #e23636;
-            box-shadow: 0 0 20px rgba(226, 54, 54, 0.3);
-        }
-
-        .hologram-display {
+        /* Three.js Canvas */
+        #hologramContainer {
             width: 100%;
-            height: 300px;
+            height: 100%;
             background: #000;
-            border-radius: 10px;
-            overflow: hidden;
+            border-radius: 15px;
+            border: 2px solid #0066ff;
+            box-shadow: 0 0 30px rgba(0, 102, 255, 0.5);
             position: relative;
-        }
-
-        .hologram-effect {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(45deg, 
-                rgba(226, 54, 54, 0.1) 0%, 
-                rgba(0, 0, 0, 0) 50%, 
-                rgba(226, 54, 54, 0.1) 100%);
-            animation: hologram-pulse 3s infinite;
-        }
-
-        @keyframes hologram-pulse {
-            0%, 100% { opacity: 0.3; }
-            50% { opacity: 0.7; }
-        }
-
-        .spiderman-gif {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            opacity: 0.8;
+            overflow: hidden;
         }
 
         /* Chat Interface */
         .chat-interface {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
             border-radius: 15px;
             padding: 20px;
             backdrop-filter: blur(10px);
+            border: 1px solid #0066ff;
+            display: flex;
+            flex-direction: column;
         }
 
         .chat-messages {
-            height: 200px;
+            flex: 1;
             overflow-y: auto;
             margin-bottom: 20px;
             padding: 15px;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.3);
             border-radius: 10px;
-            border: 1px solid #e23636;
+            border: 1px solid #0066ff;
         }
 
         .message {
@@ -120,14 +77,16 @@
         }
 
         .user-message {
-            background: rgba(226, 54, 54, 0.3);
+            background: rgba(0, 102, 255, 0.2);
             margin-left: auto;
             text-align: right;
+            border: 1px solid #0066ff;
         }
 
         .spiderman-message {
-            background: rgba(0, 86, 179, 0.3);
+            background: rgba(226, 54, 54, 0.2);
             margin-right: auto;
+            border: 1px solid #e23636;
         }
 
         /* Controls */
@@ -140,7 +99,7 @@
         .voice-btn {
             flex: 1;
             padding: 15px;
-            background: #e23636;
+            background: #0066ff;
             color: white;
             border: none;
             border-radius: 8px;
@@ -150,12 +109,13 @@
         }
 
         .voice-btn:hover {
-            background: #ff4757;
+            background: #0088ff;
             transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 102, 255, 0.4);
         }
 
         .voice-btn.listening {
-            background: #ff4757;
+            background: #e23636;
             animation: pulse 1s infinite;
         }
 
@@ -173,38 +133,22 @@
             border-radius: 8px;
             margin-bottom: 15px;
             font-size: 14px;
+            border: 1px solid #0066ff;
         }
 
         .status.recording {
             color: #ff4757;
+            border-color: #ff4757;
         }
 
         .status.processing {
             color: #ffa502;
+            border-color: #ffa502;
         }
 
         .status.responding {
             color: #2ed573;
-        }
-
-        /* Audio Visualizer */
-        .visualizer {
-            width: 100%;
-            height: 60px;
-            background: rgba(0, 0, 0, 0.5);
-            border-radius: 8px;
-            margin-top: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 2px;
-        }
-
-        .bar {
-            width: 4px;
-            background: #e23636;
-            border-radius: 2px;
-            transition: height 0.1s ease;
+            border-color: #2ed573;
         }
 
         .loading {
@@ -215,7 +159,7 @@
         .spinner {
             border: 4px solid rgba(255, 255, 255, 0.3);
             border-radius: 50%;
-            border-top: 4px solid #e23636;
+            border-top: 4px solid #0066ff;
             width: 40px;
             height: 40px;
             animation: spin 1s linear infinite;
@@ -226,62 +170,77 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            color: #0066ff;
+            font-size: 2rem;
+            text-shadow: 0 0 10px rgba(0, 102, 255, 0.5);
+            margin-bottom: 5px;
+        }
+
+        .hologram-effect {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, 
+                rgba(0, 102, 255, 0.1) 0%, 
+                rgba(0, 0, 0, 0) 50%, 
+                rgba(0, 102, 255, 0.1) 100%);
+            animation: hologram-pulse 3s infinite;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        @keyframes hologram-pulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.7; }
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>🕷️ Spider-Man Hologram</h1>
-            <p>Bicara dengan Spider-Man - Pengalaman Hologram AI</p>
+        <!-- Three.js Hologram -->
+        <div id="hologramContainer">
+            <div class="hologram-effect"></div>
+            <div class="status" id="status">Siap mendengarkan...</div>
         </div>
 
-        <div class="main-content">
-            <!-- Hologram Display -->
-            <div class="hologram-container">
-                <h2>Layar Hologram</h2>
-                <div class="hologram-display">
-                    <div class="hologram-effect"></div>
-                    <img src="https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif" alt="Spider-Man" class="spiderman-gif">
-                </div>
-                <div class="status" id="status">Siap mendengarkan...</div>
-                
-                <!-- Audio Visualizer -->
-                <div class="visualizer" id="visualizer">
-                    <div class="bar"></div>
-                    <div class="bar"></div>
-                    <div class="bar"></div>
-                    <div class="bar"></div>
-                    <div class="bar"></div>
-                    <div class="bar"></div>
-                    <div class="bar"></div>
-                    <div class="bar"></div>
-                    <div class="bar"></div>
-                    <div class="bar"></div>
+        <!-- Chat Interface -->
+        <div class="chat-interface">
+            <div class="header">
+                <h1>🕷️ Spider-Man Hologram 3D</h1>
+                <p>Bicara dengan Spider-Man - Pengalaman Hologram AI</p>
+            </div>
+
+            <div class="chat-messages" id="chatMessages">
+                <div class="message spiderman-message">
+                    Hai! Aku Spider-Man. Tanya aku apa saja tentang menjadi pahlawan!
                 </div>
             </div>
 
-            <!-- Chat Interface -->
-            <div class="chat-interface">
-                <h2>Percakapan dengan Spider-Man</h2>
-                <div class="chat-messages" id="chatMessages">
-                    <div class="message spiderman-message">
-                        Hai! Aku Spider-Man. Tanya aku apa saja tentang menjadi pahlawan!
-                    </div>
-                </div>
+            <div class="controls">
+                <button class="voice-btn" id="voiceButton">
+                    🎤 Klik untuk Bicara
+                </button>
+            </div>
 
-                <div class="controls">
-                    <button class="voice-btn" id="voiceButton">
-                        🎤 Klik untuk Bicara
-                    </button>
-                </div>
-
-                <div class="loading" id="loading" style="display: none;">
-                    <div class="spinner"></div>
-                    <p>Spidey sedang berpikir...</p>
-                </div>
+            <div class="loading" id="loading" style="display: none;">
+                <div class="spinner"></div>
+                <p>Spidey sedang berpikir...</p>
             </div>
         </div>
     </div>
+
+    <!-- Three.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
 
     <script>
         class SpidermanHolograph {
@@ -289,13 +248,12 @@
                 this.isListening = false;
                 this.recognition = null;
                 this.synthesis = null;
-                this.audioContext = null;
-                this.analyser = null;
-                this.bars = [];
+                this.isTalking = false;
+                this.mouthAnimation = null;
                 
                 this.initializeElements();
+                this.initializeThreeJS();
                 this.initializeSpeechRecognition();
-                this.initializeAudioVisualizer();
             }
 
             initializeElements() {
@@ -303,9 +261,259 @@
                 this.chatMessages = document.getElementById('chatMessages');
                 this.status = document.getElementById('status');
                 this.loading = document.getElementById('loading');
-                this.visualizer = document.getElementById('visualizer');
                 
                 this.voiceButton.addEventListener('click', () => this.toggleListening());
+            }
+
+            initializeThreeJS() {
+                // Scene
+                this.scene = new THREE.Scene();
+                this.scene.background = new THREE.Color(0x000000);
+
+                // Camera
+                this.camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+                this.camera.position.z = 5;
+
+                // Renderer
+                const container = document.getElementById('hologramContainer');
+                this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+                this.updateRendererSize();
+                container.appendChild(this.renderer.domElement);
+
+                // Lights
+                const ambientLight = new THREE.AmbientLight(0x0066ff, 0.3);
+                this.scene.add(ambientLight);
+
+                const directionalLight = new THREE.DirectionalLight(0x0066ff, 1);
+                directionalLight.position.set(5, 5, 5);
+                this.scene.add(directionalLight);
+
+                const pointLight = new THREE.PointLight(0x0066ff, 1, 100);
+                pointLight.position.set(0, 0, 10);
+                this.scene.add(pointLight);
+
+                // Create Spider-Man Head
+                this.createSpidermanHead();
+
+                // Handle window resize
+                window.addEventListener('resize', () => this.updateRendererSize());
+
+                // Start animation loop
+                this.animate();
+            }
+
+            updateRendererSize() {
+                const container = document.getElementById('hologramContainer');
+                const width = container.clientWidth;
+                const height = container.clientHeight;
+                
+                this.renderer.setSize(width, height);
+                this.camera.aspect = width / height;
+                this.camera.updateProjectionMatrix();
+            }
+
+            createSpidermanHead() {
+                // Group untuk kepala Spider-Man
+                this.headGroup = new THREE.Group();
+                this.scene.add(this.headGroup);
+
+                // Basic head shape (sphere)
+                const headGeometry = new THREE.SphereGeometry(1.5, 32, 32);
+                const headEdges = new THREE.EdgesGeometry(headGeometry);
+                const headLine = new THREE.LineSegments(
+                    headEdges,
+                    new THREE.LineBasicMaterial({ color: 0x0066ff, linewidth: 2 })
+                );
+                this.headGroup.add(headLine);
+
+                // Eyes - bentuk mata Spider-Man yang khas
+                this.createSpiderEyes();
+
+                // Web pattern pada kepala
+                this.createWebPattern();
+
+                // Mouth - untuk animasi berbicara
+                this.createMouth();
+
+                // Animasi rotasi kepala
+                this.headGroup.rotation.y = Math.PI / 6;
+            }
+
+            createSpiderEyes() {
+                // Mata kiri
+                const leftEyeGeometry = new THREE.SphereGeometry(0.4, 16, 16);
+                const leftEyeEdges = new THREE.EdgesGeometry(leftEyeGeometry);
+                const leftEye = new THREE.LineSegments(
+                    leftEyeEdges,
+                    new THREE.LineBasicMaterial({ color: 0x0066ff })
+                );
+                leftEye.position.set(-0.5, 0.3, 0.8);
+                this.headGroup.add(leftEye);
+
+                // Mata kanan
+                const rightEyeGeometry = new THREE.SphereGeometry(0.4, 16, 16);
+                const rightEyeEdges = new THREE.EdgesGeometry(rightEyeGeometry);
+                const rightEye = new THREE.LineSegments(
+                    rightEyeEdges,
+                    new THREE.LineBasicMaterial({ color: 0x0066ff })
+                );
+                rightEye.position.set(0.5, 0.3, 0.8);
+                this.headGroup.add(rightEye);
+
+                // Detail mata (lensa)
+                const leftLens = new THREE.Mesh(
+                    new THREE.CircleGeometry(0.3, 16),
+                    new THREE.MeshBasicMaterial({ 
+                        color: 0x0066ff, 
+                        transparent: true, 
+                        opacity: 0.3 
+                    })
+                );
+                leftLens.position.set(-0.5, 0.3, 0.81);
+                leftLens.rotation.x = -Math.PI / 2;
+                this.headGroup.add(leftLens);
+
+                const rightLens = new THREE.Mesh(
+                    new THREE.CircleGeometry(0.3, 16),
+                    new THREE.MeshBasicMaterial({ 
+                        color: 0x0066ff, 
+                        transparent: true, 
+                        opacity: 0.3 
+                    })
+                );
+                rightLens.position.set(0.5, 0.3, 0.81);
+                rightLens.rotation.x = -Math.PI / 2;
+                this.headGroup.add(rightLens);
+            }
+
+            createWebPattern() {
+                // Pola jaring pada kepala
+                const webMaterial = new THREE.LineBasicMaterial({ color: 0x0066ff });
+                
+                // Garis vertikal
+                for (let i = 0; i < 8; i++) {
+                    const angle = (i / 8) * Math.PI * 2;
+                    const points = [];
+                    points.push(new THREE.Vector3(0, 0, 0));
+                    points.push(new THREE.Vector3(
+                        Math.sin(angle) * 1.5,
+                        Math.cos(angle) * 1.5,
+                        0
+                    ));
+                    
+                    const webGeometry = new THREE.BufferGeometry().setFromPoints(points);
+                    const webLine = new THREE.Line(webGeometry, webMaterial);
+                    this.headGroup.add(webLine);
+                }
+
+                // Garis horizontal
+                for (let i = 0; i < 4; i++) {
+                    const radius = 0.3 + (i * 0.3);
+                    const points = [];
+                    for (let j = 0; j <= 32; j++) {
+                        const angle = (j / 32) * Math.PI * 2;
+                        points.push(new THREE.Vector3(
+                            Math.cos(angle) * radius,
+                            Math.sin(angle) * radius,
+                            0.1
+                        ));
+                    }
+                    const webGeometry = new THREE.BufferGeometry().setFromPoints(points);
+                    const webLine = new THREE.Line(webGeometry, webMaterial);
+                    this.headGroup.add(webLine);
+                }
+            }
+
+            createMouth() {
+                // Mulut sebagai kurva yang bisa dianimasikan
+                this.mouthPoints = [
+                    new THREE.Vector3(-0.5, -0.3, 0.8),
+                    new THREE.Vector3(-0.3, -0.4, 0.8),
+                    new THREE.Vector3(0, -0.45, 0.8),
+                    new THREE.Vector3(0.3, -0.4, 0.8),
+                    new THREE.Vector3(0.5, -0.3, 0.8)
+                ];
+
+                this.mouthGeometry = new THREE.BufferGeometry().setFromPoints(this.mouthPoints);
+                this.mouthMaterial = new THREE.LineBasicMaterial({ color: 0x0066ff });
+                this.mouth = new THREE.Line(this.mouthGeometry, this.mouthMaterial);
+                this.headGroup.add(this.mouth);
+
+                // State mulut normal
+                this.normalMouth = this.mouthPoints.map(p => p.clone());
+                
+                // State mulut saat berbicara
+                this.talkingMouth = [
+                    new THREE.Vector3(-0.5, -0.4, 0.8),
+                    new THREE.Vector3(-0.3, -0.5, 0.8),
+                    new THREE.Vector3(0, -0.6, 0.8),
+                    new THREE.Vector3(0.3, -0.5, 0.8),
+                    new THREE.Vector3(0.5, -0.4, 0.8)
+                ];
+            }
+
+            animateMouth() {
+                if (!this.isTalking) return;
+
+                // Animasi mulut bergerak secara acak saat berbicara
+                const time = Date.now() * 0.01;
+                const positions = this.mouthGeometry.attributes.position.array;
+
+                for (let i = 0; i < this.mouthPoints.length; i++) {
+                    const point = this.talkingMouth[i];
+                    const offset = Math.sin(time * 10 + i) * 0.05;
+                    
+                    positions[i * 3] = point.x;
+                    positions[i * 3 + 1] = point.y + offset;
+                    positions[i * 3 + 2] = point.z;
+                }
+
+                this.mouthGeometry.attributes.position.needsUpdate = true;
+            }
+
+            startTalking() {
+                this.isTalking = true;
+                
+                // Animasi transisi mulut dari normal ke berbicara
+                gsap.to(this.mouthPoints, {
+                    duration: 0.3,
+                    x: this.talkingMouth.map(p => p.x),
+                    y: this.talkingMouth.map(p => p.y),
+                    z: this.talkingMouth.map(p => p.z),
+                    onUpdate: () => {
+                        this.mouthGeometry.setFromPoints(this.mouthPoints);
+                    }
+                });
+            }
+
+            stopTalking() {
+                this.isTalking = false;
+                
+                // Animasi transisi mulut kembali ke normal
+                gsap.to(this.mouthPoints, {
+                    duration: 0.3,
+                    x: this.normalMouth.map(p => p.x),
+                    y: this.normalMouth.map(p => p.y),
+                    z: this.normalMouth.map(p => p.z),
+                    onUpdate: () => {
+                        this.mouthGeometry.setFromPoints(this.mouthPoints);
+                    }
+                });
+            }
+
+            animate() {
+                requestAnimationFrame(() => this.animate());
+
+                // Rotasi kepala yang halus
+                if (this.headGroup) {
+                    this.headGroup.rotation.y += 0.005;
+                    this.headGroup.rotation.x = Math.sin(Date.now() * 0.001) * 0.1;
+                }
+
+                // Animasi mulut jika sedang berbicara
+                this.animateMouth();
+
+                this.renderer.render(this.scene, this.camera);
             }
 
             initializeSpeechRecognition() {
@@ -315,7 +523,7 @@
                     
                     this.recognition.continuous = false;
                     this.recognition.interimResults = true;
-                    this.recognition.lang = 'id-ID'; // Bahasa Indonesia
+                    this.recognition.lang = 'id-ID';
 
                     this.recognition.onstart = () => {
                         this.isListening = true;
@@ -354,10 +562,6 @@
                 }
             }
 
-            initializeAudioVisualizer() {
-                this.bars = Array.from(this.visualizer.querySelectorAll('.bar'));
-            }
-
             toggleListening() {
                 if (this.isListening) {
                     this.stopListening();
@@ -381,22 +585,15 @@
             }
 
             async processUserInput(text) {
-                // Tambahkan pesan pengguna ke chat
                 this.addMessage(text, 'user');
                 
-                // Tampilkan loading
                 this.loading.style.display = 'block';
                 this.status.textContent = 'Spidey sedang berpikir...';
                 this.status.className = 'status processing';
 
                 try {
-                    // Simulasi pemrosesan AI (ganti dengan panggilan API AI sebenarnya)
                     const response = await this.getAIResponse(text);
-                    
-                    // Tambahkan respons Spidey ke chat
                     this.addMessage(response, 'spiderman');
-                    
-                    // Konversi ke suara
                     await this.speakResponse(response);
                     
                 } catch (error) {
@@ -410,10 +607,8 @@
             }
 
             async getAIResponse(userInput) {
-                // Simulasi penundaan panggilan API
                 await new Promise(resolve => setTimeout(resolve, 2000));
                 
-                // Logika respons sederhana - ganti dengan API AI sebenarnya
                 const responses = [
                     "Dengan kekuatan besar datang tanggung jawab yang besar! Itulah yang diajarkan Paman Ben kepadaku.",
                     "Berayun di antara gedung-gedung New York adalah perasaan terbaik di dunia! Kamu harus coba suatu hari!",
@@ -424,15 +619,9 @@
                     "Aku bisa menempel di dinding karena rambut mikroskopis di tangan dan kakiku. Keren, kan?",
                     "Melawan penjahat itu penting, tapi membantu nenek-nenek menyeberang jalan juga penting!",
                     "Cairan jaringku adalah polimer khusus yang aku temukan sendiri. Sains itu luar biasa!",
-                    "Menjadi Spider-Man yang ramah di lingkungan berarti menjaga semua orang, tidak peduli sekecil apapun masalahnya.",
-                    "Kadang aku bertanya-tanya bagaimana jika labnya tidak menggigitku... tapi kemudian aku ingat semua orang yang berhasil aku selamatkan.",
-                    "Kostum ini mungkin terlihat keren, tapi yang terpenting adalah apa yang ada di dalamnya.",
-                    "Aku belajar bahwa menjadi pahlawan bukan tentang menjadi sempurna, tapi tentang bangkit lagi ketika kita jatuh.",
-                    "Kamu tahu, menjadi Spider-Man itu melelahkan tapi sangat memuaskan ketika bisa membuat perbedaan.",
-                    "Jangan pernah meremehkan kekuatan bertindak dengan benar, bahkan dalam hal-hal kecil."
+                    "Menjadi Spider-Man yang ramah di lingkungan berarti menjaga semua orang, tidak peduli sekecil apapun masalahnya."
                 ];
                 
-                // Pencocokan kata kunci sederhana dalam bahasa Indonesia
                 const input = userInput.toLowerCase();
                 if (input.includes('kekuatan') || input.includes('tanggung jawab')) {
                     return responses[0];
@@ -455,7 +644,6 @@
                 } else if (input.includes('lingkungan') || input.includes('tetangga')) {
                     return responses[9];
                 } else {
-                    // Respons acak untuk pertanyaan yang tidak dikenal
                     return responses[Math.floor(Math.random() * responses.length)];
                 }
             }
@@ -463,12 +651,14 @@
             async speakResponse(text) {
                 this.status.textContent = 'Spidey sedang merespons...';
                 this.status.className = 'status responding';
+                
+                // Mulai animasi mulut
+                this.startTalking();
 
                 return new Promise((resolve) => {
                     if ('speechSynthesis' in window) {
                         const utterance = new SpeechSynthesisUtterance(text);
                         
-                        // Coba atur suara yang lebih muda (tergantung browser)
                         const voices = speechSynthesis.getVoices();
                         const preferredVoice = voices.find(voice => 
                             voice.lang.includes('id') || voice.name.includes('Indonesian')
@@ -483,6 +673,14 @@
                         utterance.volume = 0.8;
 
                         utterance.onend = () => {
+                            this.stopTalking();
+                            this.status.textContent = 'Siap mendengarkan...';
+                            this.status.className = 'status';
+                            resolve();
+                        };
+
+                        utterance.onerror = () => {
+                            this.stopTalking();
                             this.status.textContent = 'Siap mendengarkan...';
                             this.status.className = 'status';
                             resolve();
@@ -491,7 +689,10 @@
                         speechSynthesis.speak(utterance);
                     } else {
                         // Fallback jika sintesis suara tidak tersedia
-                        setTimeout(resolve, 2000);
+                        setTimeout(() => {
+                            this.stopTalking();
+                            resolve();
+                        }, 2000);
                     }
                 });
             }
@@ -504,23 +705,16 @@
                 this.chatMessages.appendChild(messageDiv);
                 this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
             }
-
-            updateVisualizer(volume) {
-                this.bars.forEach((bar, index) => {
-                    const height = Math.max(5, volume * 100 * (Math.sin(index * 0.5) + 1) / 2);
-                    bar.style.height = `${height}px`;
-                });
-            }
         }
 
-        // Inisialisasi aplikasi ketika halaman dimuat
+        // Initialize the application
         document.addEventListener('DOMContentLoaded', () => {
             new SpidermanHolograph();
         });
 
-        // Muat suara untuk sintesis suara
+        // Load voices for speech synthesis
         window.speechSynthesis.onvoiceschanged = function() {
-            // Suara sekarang sudah dimuat
+            // Voices are now loaded
         };
     </script>
 </body>
