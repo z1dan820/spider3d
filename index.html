@@ -1,22 +1,527 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AI Hologram Spiderman</title>
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spider-Man Hologram</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #e23636;
+            font-size: 2.5rem;
+            text-shadow: 0 0 10px rgba(226, 54, 54, 0.5);
+            margin-bottom: 10px;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Hologram Display */
+        .hologram-container {
+            position: relative;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 15px;
+            padding: 20px;
+            border: 2px solid #e23636;
+            box-shadow: 0 0 20px rgba(226, 54, 54, 0.3);
+        }
+
+        .hologram-display {
+            width: 100%;
+            height: 300px;
+            background: #000;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .hologram-effect {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, 
+                rgba(226, 54, 54, 0.1) 0%, 
+                rgba(0, 0, 0, 0) 50%, 
+                rgba(226, 54, 54, 0.1) 100%);
+            animation: hologram-pulse 3s infinite;
+        }
+
+        @keyframes hologram-pulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.7; }
+        }
+
+        .spiderman-gif {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.8;
+        }
+
+        /* Chat Interface */
+        .chat-interface {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .chat-messages {
+            height: 200px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            border: 1px solid #e23636;
+        }
+
+        .message {
+            margin-bottom: 10px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            max-width: 80%;
+        }
+
+        .user-message {
+            background: rgba(226, 54, 54, 0.3);
+            margin-left: auto;
+            text-align: right;
+        }
+
+        .spiderman-message {
+            background: rgba(0, 86, 179, 0.3);
+            margin-right: auto;
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .voice-btn {
+            flex: 1;
+            padding: 15px;
+            background: #e23636;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .voice-btn:hover {
+            background: #ff4757;
+            transform: translateY(-2px);
+        }
+
+        .voice-btn.listening {
+            background: #ff4757;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(226, 54, 54, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(226, 54, 54, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(226, 54, 54, 0); }
+        }
+
+        /* Status */
+        .status {
+            text-align: center;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        .status.recording {
+            color: #ff4757;
+        }
+
+        .status.processing {
+            color: #ffa502;
+        }
+
+        .status.responding {
+            color: #2ed573;
+        }
+
+        /* Audio Visualizer */
+        .visualizer {
+            width: 100%;
+            height: 60px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 8px;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+        }
+
+        .bar {
+            width: 4px;
+            background: #e23636;
+            border-radius: 2px;
+            transition: height 0.1s ease;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid #e23636;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
 </head>
 <body>
-  <div id="container"></div>
+    <div class="container">
+        <div class="header">
+            <h1>🕷️ Spider-Man Hologram</h1>
+            <p>Bicara dengan Spider-Man - Pengalaman Hologram AI</p>
+        </div>
 
-  <div class="chat-box">
-    <div id="response-output">👋 Halo! Aku Spiderman versi AI. Tanya sesuatu!</div>
-    <input type="text" id="user-input" placeholder="Ketik pesan..." />
-    <button id="send-btn">Kirim</button>
-  </div>
+        <div class="main-content">
+            <!-- Hologram Display -->
+            <div class="hologram-container">
+                <h2>Layar Hologram</h2>
+                <div class="hologram-display">
+                    <div class="hologram-effect"></div>
+                    <img src="https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif" alt="Spider-Man" class="spiderman-gif">
+                </div>
+                <div class="status" id="status">Siap mendengarkan...</div>
+                
+                <!-- Audio Visualizer -->
+                <div class="visualizer" id="visualizer">
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                </div>
+            </div>
 
-  <!-- Three.js CDN -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <script src="script.js"></script>
+            <!-- Chat Interface -->
+            <div class="chat-interface">
+                <h2>Percakapan dengan Spider-Man</h2>
+                <div class="chat-messages" id="chatMessages">
+                    <div class="message spiderman-message">
+                        Hai! Aku Spider-Man. Tanya aku apa saja tentang menjadi pahlawan!
+                    </div>
+                </div>
+
+                <div class="controls">
+                    <button class="voice-btn" id="voiceButton">
+                        🎤 Klik untuk Bicara
+                    </button>
+                </div>
+
+                <div class="loading" id="loading" style="display: none;">
+                    <div class="spinner"></div>
+                    <p>Spidey sedang berpikir...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class SpidermanHolograph {
+            constructor() {
+                this.isListening = false;
+                this.recognition = null;
+                this.synthesis = null;
+                this.audioContext = null;
+                this.analyser = null;
+                this.bars = [];
+                
+                this.initializeElements();
+                this.initializeSpeechRecognition();
+                this.initializeAudioVisualizer();
+            }
+
+            initializeElements() {
+                this.voiceButton = document.getElementById('voiceButton');
+                this.chatMessages = document.getElementById('chatMessages');
+                this.status = document.getElementById('status');
+                this.loading = document.getElementById('loading');
+                this.visualizer = document.getElementById('visualizer');
+                
+                this.voiceButton.addEventListener('click', () => this.toggleListening());
+            }
+
+            initializeSpeechRecognition() {
+                if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                    this.recognition = new SpeechRecognition();
+                    
+                    this.recognition.continuous = false;
+                    this.recognition.interimResults = true;
+                    this.recognition.lang = 'id-ID'; // Bahasa Indonesia
+
+                    this.recognition.onstart = () => {
+                        this.isListening = true;
+                        this.voiceButton.classList.add('listening');
+                        this.voiceButton.innerHTML = '🛑 Sedang Mendengarkan...';
+                        this.status.textContent = 'Sedang mendengarkan...';
+                        this.status.className = 'status recording';
+                    };
+
+                    this.recognition.onresult = (event) => {
+                        let transcript = '';
+                        for (let i = event.resultIndex; i < event.results.length; i++) {
+                            if (event.results[i].isFinal) {
+                                transcript += event.results[i][0].transcript;
+                            }
+                        }
+                        
+                        if (transcript) {
+                            this.processUserInput(transcript);
+                        }
+                    };
+
+                    this.recognition.onerror = (event) => {
+                        console.error('Speech recognition error:', event.error);
+                        this.stopListening();
+                        this.addMessage("Maaf, aku tidak mendengar yang kamu katakan. Coba lagi?", 'spiderman');
+                    };
+
+                    this.recognition.onend = () => {
+                        this.stopListening();
+                    };
+                } else {
+                    this.voiceButton.disabled = true;
+                    this.voiceButton.innerHTML = '❌ Suara Tidak Didukung';
+                    this.addMessage("Browser kamu tidak mendukung pengenalan suara. Coba gunakan Chrome atau Edge.", 'spiderman');
+                }
+            }
+
+            initializeAudioVisualizer() {
+                this.bars = Array.from(this.visualizer.querySelectorAll('.bar'));
+            }
+
+            toggleListening() {
+                if (this.isListening) {
+                    this.stopListening();
+                } else {
+                    this.startListening();
+                }
+            }
+
+            startListening() {
+                if (this.recognition) {
+                    this.recognition.start();
+                }
+            }
+
+            stopListening() {
+                this.isListening = false;
+                this.voiceButton.classList.remove('listening');
+                this.voiceButton.innerHTML = '🎤 Klik untuk Bicara';
+                this.status.textContent = 'Memproses...';
+                this.status.className = 'status processing';
+            }
+
+            async processUserInput(text) {
+                // Tambahkan pesan pengguna ke chat
+                this.addMessage(text, 'user');
+                
+                // Tampilkan loading
+                this.loading.style.display = 'block';
+                this.status.textContent = 'Spidey sedang berpikir...';
+                this.status.className = 'status processing';
+
+                try {
+                    // Simulasi pemrosesan AI (ganti dengan panggilan API AI sebenarnya)
+                    const response = await this.getAIResponse(text);
+                    
+                    // Tambahkan respons Spidey ke chat
+                    this.addMessage(response, 'spiderman');
+                    
+                    // Konversi ke suara
+                    await this.speakResponse(response);
+                    
+                } catch (error) {
+                    console.error('Error:', error);
+                    this.addMessage("Ups! Ada yang tidak beres. Coba lagi, kawan!", 'spiderman');
+                } finally {
+                    this.loading.style.display = 'none';
+                    this.status.textContent = 'Siap mendengarkan...';
+                    this.status.className = 'status';
+                }
+            }
+
+            async getAIResponse(userInput) {
+                // Simulasi penundaan panggilan API
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                
+                // Logika respons sederhana - ganti dengan API AI sebenarnya
+                const responses = [
+                    "Dengan kekuatan besar datang tanggung jawab yang besar! Itulah yang diajarkan Paman Ben kepadaku.",
+                    "Berayun di antara gedung-gedung New York adalah perasaan terbaik di dunia! Kamu harus coba suatu hari!",
+                    "Menjadi pahlawan bukan tentang kostumnya, tapi tentang membantu orang yang membutuhkan.",
+                    "The Avengers? Ya, kami pernah bekerja sama beberapa kali. Tapi Iron Man bisa sedikit berlebihan!",
+                    "Spidey-sense-ku bergetar! Itu artinya ada bahaya di dekat sini!",
+                    "Mary Jane dan aku... ya, itu rumit. Menjadi Spider-Man membuat hubungan jadi sulit.",
+                    "Aku bisa menempel di dinding karena rambut mikroskopis di tangan dan kakiku. Keren, kan?",
+                    "Melawan penjahat itu penting, tapi membantu nenek-nenek menyeberang jalan juga penting!",
+                    "Cairan jaringku adalah polimer khusus yang aku temukan sendiri. Sains itu luar biasa!",
+                    "Menjadi Spider-Man yang ramah di lingkungan berarti menjaga semua orang, tidak peduli sekecil apapun masalahnya.",
+                    "Kadang aku bertanya-tanya bagaimana jika labnya tidak menggigitku... tapi kemudian aku ingat semua orang yang berhasil aku selamatkan.",
+                    "Kostum ini mungkin terlihat keren, tapi yang terpenting adalah apa yang ada di dalamnya.",
+                    "Aku belajar bahwa menjadi pahlawan bukan tentang menjadi sempurna, tapi tentang bangkit lagi ketika kita jatuh.",
+                    "Kamu tahu, menjadi Spider-Man itu melelahkan tapi sangat memuaskan ketika bisa membuat perbedaan.",
+                    "Jangan pernah meremehkan kekuatan bertindak dengan benar, bahkan dalam hal-hal kecil."
+                ];
+                
+                // Pencocokan kata kunci sederhana dalam bahasa Indonesia
+                const input = userInput.toLowerCase();
+                if (input.includes('kekuatan') || input.includes('tanggung jawab')) {
+                    return responses[0];
+                } else if (input.includes('ayun') || input.includes('gedung')) {
+                    return responses[1];
+                } else if (input.includes('pahlawan') || input.includes('kostum')) {
+                    return responses[2];
+                } else if (input.includes('avenger') || input.includes('iron man')) {
+                    return responses[3];
+                } else if (input.includes('spidey sense') || input.includes('bergetar')) {
+                    return responses[4];
+                } else if (input.includes('mary jane') || input.includes('pacaran')) {
+                    return responses[5];
+                } else if (input.includes('tempel') || input.includes('dinding')) {
+                    return responses[6];
+                } else if (input.includes('lawan') || input.includes('penjahat')) {
+                    return responses[7];
+                } else if (input.includes('jaring') || input.includes('sains')) {
+                    return responses[8];
+                } else if (input.includes('lingkungan') || input.includes('tetangga')) {
+                    return responses[9];
+                } else {
+                    // Respons acak untuk pertanyaan yang tidak dikenal
+                    return responses[Math.floor(Math.random() * responses.length)];
+                }
+            }
+
+            async speakResponse(text) {
+                this.status.textContent = 'Spidey sedang merespons...';
+                this.status.className = 'status responding';
+
+                return new Promise((resolve) => {
+                    if ('speechSynthesis' in window) {
+                        const utterance = new SpeechSynthesisUtterance(text);
+                        
+                        // Coba atur suara yang lebih muda (tergantung browser)
+                        const voices = speechSynthesis.getVoices();
+                        const preferredVoice = voices.find(voice => 
+                            voice.lang.includes('id') || voice.name.includes('Indonesian')
+                        );
+                        
+                        if (preferredVoice) {
+                            utterance.voice = preferredVoice;
+                        }
+                        
+                        utterance.rate = 1.1;
+                        utterance.pitch = 1.2;
+                        utterance.volume = 0.8;
+
+                        utterance.onend = () => {
+                            this.status.textContent = 'Siap mendengarkan...';
+                            this.status.className = 'status';
+                            resolve();
+                        };
+
+                        speechSynthesis.speak(utterance);
+                    } else {
+                        // Fallback jika sintesis suara tidak tersedia
+                        setTimeout(resolve, 2000);
+                    }
+                });
+            }
+
+            addMessage(text, sender) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${sender}-message`;
+                messageDiv.textContent = text;
+                
+                this.chatMessages.appendChild(messageDiv);
+                this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+            }
+
+            updateVisualizer(volume) {
+                this.bars.forEach((bar, index) => {
+                    const height = Math.max(5, volume * 100 * (Math.sin(index * 0.5) + 1) / 2);
+                    bar.style.height = `${height}px`;
+                });
+            }
+        }
+
+        // Inisialisasi aplikasi ketika halaman dimuat
+        document.addEventListener('DOMContentLoaded', () => {
+            new SpidermanHolograph();
+        });
+
+        // Muat suara untuk sintesis suara
+        window.speechSynthesis.onvoiceschanged = function() {
+            // Suara sekarang sudah dimuat
+        };
+    </script>
 </body>
 </html>
