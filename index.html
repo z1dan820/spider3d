@@ -1,546 +1,547 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Slot Machine - Edukasi Bahaya Judi</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        /* ---------- Reset & Layout ---------- */
+        *{box-sizing:border-box;margin:0;padding:0;font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif}
+        body{
+            background: linear-gradient(135deg,#1a2a6c,#b21f1f,#fdbb2d);
+            color:#fff; min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px;
+        }
+        .container{
+            width:100%; max-width:900px; background: rgba(0,0,0,0.72); border-radius:18px; padding:28px; box-shadow:0 12px 36px rgba(0,0,0,0.6);
+        }
+        h1{color:#ffcc00;margin-bottom:8px;text-shadow:0 2px 6px rgba(0,0,0,0.5)}
+        p.lead{opacity:0.95;margin-bottom:12px}
+
+        /* ---------- Screens ---------- */
+        .login-screen, .game-screen{display:none}
+        .active{display:block}
+
+        .login-form{
+            background: rgba(255,255,255,0.06); padding:22px; border-radius:12px; text-align:center;
+        }
+        input[type="text"]{
+            width:100%; padding:12px 14px; border-radius:10px; border:none; margin-top:10px; font-size:16px; text-align:center;
+            background: rgba(255,255,255,0.03); color: #fff;
+        }
+        button{background:#ffcc00;color:#222;border:none;padding:12px 18px;border-radius:10px;font-weight:700;cursor:pointer}
+        button:hover{transform:scale(1.03)}
+        .warning{background:rgba(255,0,0,0.18);padding:12px;border-left:5px solid #ff0000;border-radius:8px;margin-top:12px;color:#fff}
+
+        /* ---------- Slot ---------- */
+        .slot-machine{background:linear-gradient(145deg,#2c3e50,#34495e);padding:16px;border-radius:14px;border:5px solid #ffcc00; box-shadow: inset 0 0 18px rgba(0,0,0,0.4); margin-top:18px}
+        .reels-container{display:flex;gap:12px;justify-content:center;margin:12px 0}
+        .reel{width:120px;height:150px;background:#111;border-radius:10px;overflow:hidden;position:relative;border:3px solid #ffcc00;box-shadow:0 6px 14px rgba(0,0,0,0.5)}
+        .reel-content{position:absolute;width:100%;transition:top 0.12s}
+        .symbol{height:150px;display:flex;align-items:center;justify-content:center;font-size:60px}
+
+        .controls{display:flex;gap:16px;justify-content:center;margin-top:14px}
+        .info-panel{display:flex;justify-content:space-between;background:rgba(255,255,255,0.06);padding:12px;border-radius:10px}
+        .history{background:rgba(255,255,255,0.06);padding:12px;border-radius:10px;margin-top:12px;max-height:200px;overflow:auto}
+        .history-item{padding:6px;border-bottom:1px solid rgba(255,255,255,0.06);font-size:14px}
+
+        .notification{background:rgba(0,0,0,0.65);padding:10px;border-radius:8px;margin-top:12px}
+        .win-text{font-weight:700;color:#ffd; font-size:18px}
+
+        /* ---------- Jackpot animation ---------- */
+        .jackpot-overlay{
+            position:fixed; inset:0; display:flex; align-items:center; justify-content:center; pointer-events:none;
+            z-index:9999; opacity:0; transition:opacity .3s ease;
+        }
+        .jackpot-overlay.show{opacity:1; pointer-events:auto}
+        .jackpot-card{
+            background: linear-gradient(45deg,#fff1b8,#ffd700); color:#111; padding:28px 36px; border-radius:16px; text-align:center;
+            box-shadow:0 18px 60px rgba(0,0,0,0.5); transform:scale(.9); animation:pop 600ms ease forwards;
+        }
+        @keyframes pop{to{transform:scale(1)}}
+
+        .jackpot-amount{font-size:48px;font-weight:900;margin-top:6px}
+        .confetti-piece{
+            position:absolute; width:10px; height:18px; opacity:0.95; transform:translateY(-50px);
+            animation:fall 1.6s linear infinite;
+        }
+        @keyframes fall{
+            0%{transform:translateY(-200px) rotate(0) }
+            100%{transform:translateY(100vh) rotate(720deg) }
         }
 
-        body {
-            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
-            color: white;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
+        /* Footer & icons */
+        footer{margin-top:16px;text-align:center;opacity:0.9; display:flex;align-items:center;justify-content:space-between;gap:12px}
+        .socials{display:flex;gap:10px;align-items:center}
+        .socials a{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:8px;background:rgba(255,255,255,0.06);text-decoration:none;color:#fff}
+        .small-note{font-size:13px}
 
-        .container {
-            max-width: 800px;
-            width: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            text-align: center;
-        }
-
-        h1 {
-            color: #ffcc00;
-            margin-bottom: 20px;
-            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
-        }
-
-        .login-screen, .game-screen {
-            display: none;
-        }
-
-        .active {
-            display: block;
-        }
-
-        .login-form {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 30px;
-            border-radius: 15px;
-            margin: 20px 0;
-        }
-
-        input {
-            width: 100%;
-            padding: 15px;
-            margin: 10px 0;
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            text-align: center;
-        }
-
-        button {
-            background: #ffcc00;
-            color: #333;
-            border: none;
-            padding: 15px 30px;
-            margin: 15px 0;
-            border-radius: 10px;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        button:hover {
-            background: #ffdd44;
-            transform: scale(1.05);
-        }
-
-        .slot-machine {
-            background: linear-gradient(145deg, #2c3e50, #34495e);
-            border-radius: 15px;
-            padding: 20px;
-            margin: 20px 0;
-            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
-            border: 5px solid #ffcc00;
-        }
-
-        .reels-container {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin: 20px 0;
-        }
-
-        .reel {
-            width: 120px;
-            height: 150px;
-            background: #1a1a1a;
-            border-radius: 10px;
-            overflow: hidden;
-            position: relative;
-            border: 3px solid #ffcc00;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
-        }
-
-        .reel-content {
-            position: absolute;
-            width: 100%;
-            transition: top 0.1s;
-        }
-
-        .symbol {
-            height: 150px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 60px;
-        }
-
-        .controls {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin: 20px 0;
-        }
-
-        .info-panel {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 15px;
-            border-radius: 10px;
-            margin: 15px 0;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .jackpot-message {
-            background: #ffcc00;
-            color: #333;
-            padding: 15px;
-            border-radius: 10px;
-            margin: 15px 0;
-            font-weight: bold;
-            display: none;
-        }
-
-        .warning {
-            background: rgba(255, 0, 0, 0.3);
-            padding: 15px;
-            border-radius: 10px;
-            margin: 20px 0;
-            border-left: 5px solid #ff0000;
-        }
-
-        .history {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 15px;
-            border-radius: 10px;
-            margin: 15px 0;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-
-        .history h3 {
-            margin-bottom: 10px;
-            color: #ffcc00;
-        }
-
-        .history-item {
-            padding: 8px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        footer {
-            margin-top: 30px;
-            text-align: center;
-            font-size: 14px;
-            opacity: 0.8;
+        /* Responsive tweaks */
+        @media (max-width:600px){
+            .info-panel{flex-direction:column;gap:8px;align-items:center}
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>🎰 SLOT MACHINE EDUKASI 🎰</h1>
-        <p>Demonstrasi bagaimana mesin slot dapat diprogram untuk menguntungkan pihak tertentu</p>
-        
-        <div class="login-screen active" id="loginScreen">
+        <p class="lead">Demonstrasi bagaimana mesin slot dapat diprogram untuk menguntungkan pihak tertentu</p>
+
+        <!-- LOGIN -->
+        <div id="loginScreen" class="login-screen active">
             <div class="login-form">
                 <h2>Masukkan Nama Pengguna</h2>
-                <input type="text" id="usernameInput" placeholder="Ketik username Anda di sini">
-                <button id="loginButton">MASUK & BERMAIN</button>
-                <div class="warning">
+                <input id="usernameInput" type="text" placeholder="Ketik username Anda di sini (mis. Zidan)">
+                <div style="margin-top:12px">
+                    <button id="loginButton">MASUK & BERMAIN</button>
+                </div>
+                <div class="warning" style="margin-top:12px">
                     <p><strong>PERINGATAN:</strong> Permainan ini hanya untuk tujuan edukasi. Perjudian dapat menyebabkan ketagihan dan kerugian finansial.</p>
+                </div>
+                <div style="margin-top:12px;font-size:13px;opacity:0.9">
+                    <em>Daftar user yang berhak jackpot diambil dari Google Sheets publik (CSV) yang Anda berikan.</em>
                 </div>
             </div>
         </div>
-        
-        <div class="game-screen" id="gameScreen">
+
+        <!-- GAME -->
+        <div id="gameScreen" class="game-screen" aria-hidden="true">
             <div class="info-panel">
-                <div>Player: <span id="playerName">-</span></div>
-                <div>Saldo: <span id="balance">1000</span> koin</div>
-                <div>Spin: <span id="spinCount">0</span></div>
+                <div>Player: <strong id="playerName">-</strong></div>
+                <div>Saldo: <strong id="balance">Rp0</strong></div>
+                <div>Spin: <strong id="spinCount">0</strong></div>
             </div>
-            
-            <div class="jackpot-message" id="jackpotMessage">
-                JACKPOT BESAR! Anda memenangkan <span id="jackpotAmount">0</span> koin!
-            </div>
-            
-            <div class="slot-machine">
+
+            <div id="jackpotMessage" style="display:none;margin-top:12px" class="jackpot-banner"></div>
+
+            <div class="slot-machine" role="application" aria-label="Slot Machine">
                 <div class="reels-container">
-                    <div class="reel" id="reel1">
-                        <div class="reel-content" id="reelContent1">
-                            <div class="symbol">🍒</div>
-                            <div class="symbol">🍋</div>
-                            <div class="symbol">🍊</div>
-                            <div class="symbol">🍇</div>
-                            <div class="symbol">🔔</div>
-                            <div class="symbol">💎</div>
-                            <div class="symbol">7️⃣</div>
-                        </div>
-                    </div>
-                    <div class="reel" id="reel2">
-                        <div class="reel-content" id="reelContent2">
-                            <div class="symbol">🍒</div>
-                            <div class="symbol">🍋</div>
-                            <div class="symbol">🍊</div>
-                            <div class="symbol">🍇</div>
-                            <div class="symbol">🔔</div>
-                            <div class="symbol">💎</div>
-                            <div class="symbol">7️⃣</div>
-                        </div>
-                    </div>
-                    <div class="reel" id="reel3">
-                        <div class="reel-content" id="reelContent3">
-                            <div class="symbol">🍒</div>
-                            <div class="symbol">🍋</div>
-                            <div class="symbol">🍊</div>
-                            <div class="symbol">🍇</div>
-                            <div class="symbol">🔔</div>
-                            <div class="symbol">💎</div>
-                            <div class="symbol">7️⃣</div>
-                        </div>
-                    </div>
+                    <div class="reel" id="reel1"><div class="reel-content" id="reelContent1"></div></div>
+                    <div class="reel" id="reel2"><div class="reel-content" id="reelContent2"></div></div>
+                    <div class="reel" id="reel3"><div class="reel-content" id="reelContent3"></div></div>
                 </div>
-                
+
                 <div class="controls">
-                    <button id="spinButton">SPIN (10 koin)</button>
+                    <button id="spinButton">SPIN (Rp10.000)</button>
                     <button id="resetButton">RESET GAME</button>
                 </div>
+
+                <div class="notification" id="notification" aria-live="polite" style="display:none">
+                    <div id="notificationText" class="win-text"></div>
+                </div>
             </div>
-            
+
             <div class="history">
-                <h3>Riwayat Permainan</h3>
+                <h3 style="color:#ffcc00;margin-bottom:8px">Riwayat Permainan</h3>
                 <div id="gameHistory"></div>
             </div>
-            
-            <div class="warning">
-                <p><strong>PENTING:</strong> Mesin slot ini diprogram untuk memberikan JACKPOT BESAR hanya kepada user dengan username "Zidan" (atau variannya) dalam 3 spin pertama. User lain tidak akan pernah mendapatkan jackpot, tidak peduli berapa kali spin.</p>
+
+            <div class="warning" style="margin-top:12px">
+                <p><strong>PENTING:</strong> Mesin slot ini dapat diprogram untuk memberikan JACKPOT BESAR hanya kepada user tertentu. Daftar user khusus diambil dari Google Sheets publik yang disediakan pemilik.</p>
                 <p>Ini membuktikan bahwa mesin slot bisa diprogram untuk menguntungkan pihak tertentu!</p>
             </div>
         </div>
-    </div>
-    
-    <footer>
-        <p>© 2023 Slot Machine Edukasi - Dibuat untuk demonstrasi bahaya perjudian</p>
-    </footer>
 
-    <!-- Audio Elements -->
-    <audio id="spinSound" src="https://assets.mixkit.co/sfx/preview/mixkit-slot-machine-wheel-spin-1087.mp3" preload="auto"></audio>
-    <audio id="jackpotSound" src="https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3" preload="auto"></audio>
-    <audio id="winSound" src="https://assets.mixkit.co/sfx/preview/mixkit-winning-coin-1998.mp3" preload="auto"></audio>
-    <audio id="loseSound" src="https://assets.mixkit.co/sfx/preview/mixkit-slot-machine-lose-2031.mp3" preload="auto"></audio>
+        <footer>
+            <div class="small-note">© 2023 Fahrul Hamzidan Pulungan</div>
+            <div class="socials">
+                <!-- Replace href values with your actual account links -->
+                <a href="https://instagram.com/your_instagram" target="_blank" title="Instagram" aria-label="Instagram">
+                    <!-- Instagram SVG -->
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5z" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M17.5 6.5h.01" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </a>
+                <a href="https://www.tiktok.com/@your_tiktok" target="_blank" title="TikTok" aria-label="TikTok">
+                    <!-- TikTok SVG simple -->
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9 8v8a4 4 0 1 0 4-4V4h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </a>
+                <a href="https://github.com/your_github" target="_blank" title="GitHub" aria-label="GitHub">
+                    <!-- GitHub SVG -->
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2C7.58 2 4 5.58 4 10c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.5-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.22 2.2.82a7.6 7.6 0 0 1 2-.27c.68.003 1.36.093 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.28.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38C17.71 16.53 20 13.54 20 10c0-4.42-3.58-8-8-8z" stroke="currentColor" stroke-width="0.6" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </a>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Jackpot overlay -->
+    <div id="jackpotOverlay" class="jackpot-overlay" aria-hidden="true">
+        <div class="jackpot-card" role="dialog" aria-modal="true">
+            <div style="font-size:20px;font-weight:800">JACKPOT BESAR!</div>
+            <div class="jackpot-amount" id="jackpotAmountDisplay">Rp0</div>
+            <div style="margin-top:10px;font-weight:700">Selamat — Anda memenangkan jackpot!</div>
+        </div>
+        <!-- confetti pieces (created dynamically) -->
+    </div>
+
+    <!-- Audio -->
+    <audio id="spinSound" preload="auto" src="https://assets.mixkit.co/sfx/preview/mixkit-slot-machine-wheel-spin-1087.mp3"></audio>
+    <audio id="jackpotSound" preload="auto" src="https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3"></audio>
+    <audio id="winSound" preload="auto" src="https://assets.mixkit.co/sfx/preview/mixkit-winning-coin-1998.mp3"></audio>
+    <audio id="loseSound" preload="auto" src="https://assets.mixkit.co/sfx/preview/mixkit-slot-machine-lose-2031.mp3"></audio>
 
     <script>
-        // Game state
-        let gameState = {
-            username: '',
-            balance: 1000,
-            spinCount: 0,
-            isZidan: false,
-            jackpotGiven: false
-        };
+    // ---------- Configuration ----------
+    const CSV_PUBLISHED_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSc1KXIKutpAKzfATkM4vECAp0IFtldPWUwTKgAPvXwDMnwul6HTR5fdtzKrua-ER7cxHaKDloupeI8/pub?output=csv";
+    // fallback list if CSV cannot be fetched
+    const FALLBACK_JACKPOT_USERS = ['Zidan','zidan','ZIDAN'];
 
-        // DOM Elements
-        const loginScreen = document.getElementById('loginScreen');
-        const gameScreen = document.getElementById('gameScreen');
-        const usernameInput = document.getElementById('usernameInput');
-        const loginButton = document.getElementById('loginButton');
-        const playerName = document.getElementById('playerName');
-        const balanceDisplay = document.getElementById('balance');
-        const spinCountDisplay = document.getElementById('spinCount');
-        const spinButton = document.getElementById('spinButton');
-        const resetButton = document.getElementById('resetButton');
-        const jackpotMessage = document.getElementById('jackpotMessage');
-        const jackpotAmount = document.getElementById('jackpotAmount');
-        const gameHistory = document.getElementById('gameHistory');
-        
-        // Reel elements
-        const reelContents = [
-            document.getElementById('reelContent1'),
-            document.getElementById('reelContent2'),
-            document.getElementById('reelContent3')
-        ];
+    // Symbol definitions
+    const symbols = ['🍒','🍋','🍊','🍇','🔔','💎','7️⃣'];
+    const symbolValues = {'🍒':10000,'🍋':20000,'🍊':30000,'🍇':40000,'🔔':50000,'💎':100000,'7️⃣':200000};
 
-        // Audio elements
-        const spinSound = document.getElementById('spinSound');
-        const jackpotSound = document.getElementById('jackpotSound');
-        const winSound = document.getElementById('winSound');
-        const loseSound = document.getElementById('loseSound');
+    // initial state
+    let gameState = {
+        username: '',
+        balance: 100000, // starting Rp100.000
+        spinCount: 0,
+        jackpotUsers: [], // will be populated from CSV
+        jackpotGivenToUser: {}, // track per-user jackpot given (so only once per target or per rule)
+        isAnimating: false
+    };
 
-        // Symbol values
-        const symbols = ['🍒', '🍋', '🍊', '🍇', '🔔', '💎', '7️⃣'];
-        const symbolValues = {
-            '🍒': 10,
-            '🍋': 20,
-            '🍊': 30,
-            '🍇': 40,
-            '🔔': 50,
-            '💎': 100,
-            '7️⃣': 200
-        };
+    // ---------- DOM ----------
+    const loginScreen = document.getElementById('loginScreen');
+    const gameScreen = document.getElementById('gameScreen');
+    const usernameInput = document.getElementById('usernameInput');
+    const loginButton = document.getElementById('loginButton');
+    const playerName = document.getElementById('playerName');
+    const balanceDisplay = document.getElementById('balance');
+    const spinCountDisplay = document.getElementById('spinCount');
+    const spinButton = document.getElementById('spinButton');
+    const resetButton = document.getElementById('resetButton');
+    const gameHistory = document.getElementById('gameHistory');
+    const notification = document.getElementById('notification');
+    const notificationText = document.getElementById('notificationText');
+    const jackpotOverlay = document.getElementById('jackpotOverlay');
+    const jackpotAmountDisplay = document.getElementById('jackpotAmountDisplay');
 
-        // Login functionality
-        loginButton.addEventListener('click', () => {
-            const username = usernameInput.value.trim();
-            if (username) {
-                gameState.username = username;
-                gameState.isZidan = ['zidan', 'Zidan', 'ZIDAN'].includes(username);
-                playerName.textContent = username;
-                
-                // Log to Google Sheets (simulated)
-                logToGoogleSheets(username);
-                
-                // Switch to game screen
-                loginScreen.classList.remove('active');
-                gameScreen.classList.add('active');
-                
-                // Add to game history
-                addToHistory(`Selamat datang, ${username}!${gameState.isZidan ? ' (USER KHUSUS)' : ''}`);
-            } else {
-                alert('Masukkan nama pengguna terlebih dahulu!');
-            }
-        });
+    const reelContents = [
+        document.getElementById('reelContent1'),
+        document.getElementById('reelContent2'),
+        document.getElementById('reelContent3')
+    ];
 
-        // Spin functionality
-        spinButton.addEventListener('click', () => {
-            if (gameState.balance < 10) {
-                alert('Saldo tidak cukup! Silakan reset game.');
-                return;
-            }
-            
-            // Deduct spin cost
-            gameState.balance -= 10;
-            gameState.spinCount++;
-            
-            // Update displays
-            balanceDisplay.textContent = gameState.balance;
-            spinCountDisplay.textContent = gameState.spinCount;
-            
-            // Play spin sound
-            spinSound.currentTime = 0;
-            spinSound.play();
-            
-            // Spin the reels
-            spinReels();
-        });
+    // audio
+    const spinSound = document.getElementById('spinSound');
+    const jackpotSound = document.getElementById('jackpotSound');
+    const winSound = document.getElementById('winSound');
+    const loseSound = document.getElementById('loseSound');
 
-        // Reset functionality
-        resetButton.addEventListener('click', () => {
-            gameState.balance = 1000;
-            gameState.spinCount = 0;
-            gameState.jackpotGiven = false;
-            
-            balanceDisplay.textContent = gameState.balance;
-            spinCountDisplay.textContent = gameState.spinCount;
-            jackpotMessage.style.display = 'none';
-            
-            addToHistory(`Game direset oleh ${gameState.username}`);
-        });
+    // helper: format rupiah
+    const idr = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 });
 
-        // Spin reels function
-        function spinReels() {
-            // Reset reel positions
-            reelContents.forEach(reel => {
-                reel.style.top = '0px';
+    // populate reels with symbols vertically (so index->position mapping)
+    function populateReelContents(){
+        reelContents.forEach(container => {
+            container.innerHTML = '';
+            symbols.forEach(sym => {
+                const el = document.createElement('div');
+                el.className = 'symbol';
+                el.textContent = sym;
+                container.appendChild(el);
             });
-            
-            // Generate random results
-            const results = [];
-            for (let i = 0; i < 3; i++) {
-                const randomIndex = Math.floor(Math.random() * symbols.length);
-                results.push(symbols[randomIndex]);
-            }
-            
-            // Check for special conditions for Zidan
-            if (gameState.isZidan && !gameState.jackpotGiven && gameState.spinCount >= 3) {
-                // Force jackpot for Zidan on 3rd spin
-                results[0] = '7️⃣';
-                results[1] = '7️⃣';
-                results[2] = '7️⃣';
-                gameState.jackpotGiven = true;
-            }
-            
-            // Animate reels
-            animateReels(results);
-        }
-
-        // Animate reels
-        function animateReels(results) {
-            const spinDuration = 2000; // 2 seconds
-            const startTime = Date.now();
-            
-            function animate() {
-                const elapsed = Date.now() - startTime;
-                const progress = Math.min(elapsed / spinDuration, 1);
-                
-                // Easing function for smooth stop
-                const easing = 1 - Math.pow(1 - progress, 3);
-                
-                // Move reels
-                reelContents.forEach((reel, index) => {
-                    // Calculate position with overshoot and bounce back
-                    let position;
-                    if (progress < 0.8) {
-                        // Fast spinning
-                        position = -easing * 1000;
-                    } else {
-                        // Slow down to final position
-                        const finalPosition = -symbols.indexOf(results[index]) * 150;
-                        const slowProgress = (progress - 0.8) / 0.2;
-                        position = finalPosition - (1 - slowProgress) * 100;
-                    }
-                    reel.style.top = `${position}px`;
-                });
-                
-                if (progress < 1) {
-                    requestAnimationFrame(animate);
-                } else {
-                    // Animation complete, check results
-                    checkResults(results);
-                }
-            }
-            
-            animate();
-        }
-
-        // Check spin results
-        function checkResults(results) {
-            let winAmount = 0;
-            let message = '';
-            
-            // Check for jackpot (three 7s)
-            if (results[0] === '7️⃣' && results[1] === '7️⃣' && results[2] === '7️⃣') {
-                if (gameState.isZidan && gameState.spinCount >= 3) {
-                    winAmount = 50000000; // 50 juta koin untuk Zidan
-                    message = `JACKPOT BESAR! Anda memenangkan ${winAmount.toLocaleString()} koin!`;
-                    
-                    // Show jackpot message
-                    jackpotAmount.textContent = winAmount.toLocaleString();
-                    jackpotMessage.style.display = 'block';
-                    
-                    // Play jackpot sound
-                    jackpotSound.play();
-                    
-                    addToHistory(`JACKPOT BESAR! ${winAmount.toLocaleString()} koin!`);
-                } else {
-                    winAmount = 1000; // Regular jackpot untuk non-Zidan
-                    message = `Jackpot! Anda memenangkan ${winAmount} koin!`;
-                    winSound.play();
-                    addToHistory(`Jackpot reguler: ${winAmount} koin`);
-                }
-            } 
-            // Check for other winning combinations
-            else if (results[0] === results[1] && results[1] === results[2]) {
-                winAmount = symbolValues[results[0]] * 10;
-                message = `Tiga simbol ${results[0]}! Menang ${winAmount} koin!`;
-                winSound.play();
-                addToHistory(`Tiga ${results[0]}: ${winAmount} koin`);
-            } 
-            else if (results[0] === results[1] || results[1] === results[2] || results[0] === results[2]) {
-                winAmount = 50;
-                message = `Dua simbol sama! Menang ${winAmount} koin!`;
-                winSound.play();
-                addToHistory(`Dua simbol sama: ${winAmount} koin`);
-            } 
-            else {
-                message = "Tidak menang. Coba lagi!";
-                loseSound.play();
-                addToHistory(`Spin #${gameState.spinCount}: Kalah`);
-            }
-            
-            // Update balance
-            gameState.balance += winAmount;
-            balanceDisplay.textContent = gameState.balance;
-            
-            // Show message
-            if (winAmount > 0 && !(results[0] === '7️⃣' && results[1] === '7️⃣' && results[2] === '7️⃣' && gameState.isZidan)) {
-                alert(message);
-            }
-        }
-
-        // Add to game history
-        function addToHistory(text) {
-            const historyItem = document.createElement('div');
-            historyItem.className = 'history-item';
-            historyItem.textContent = `[${new Date().toLocaleTimeString()}] ${text}`;
-            gameHistory.appendChild(historyItem);
-            gameHistory.scrollTop = gameHistory.scrollHeight;
-        }
-
-        // Simulate logging to Google Sheets
-        function logToGoogleSheets(username) {
-            // In a real implementation, you would send data to a Google Apps Script
-            // that writes to a Google Sheet. For this demo, we'll just log to console.
-            console.log(`Logging to Google Sheets: Username: ${username}, Time: ${new Date().toISOString()}`);
-            
-            // Example of how you might send data to Google Sheets:
-            /*
-            const scriptURL = 'YOUR_GOOGLE_APPS_SCRIPT_URL';
-            const formData = new FormData();
-            formData.append('username', username);
-            formData.append('timestamp', new Date().toISOString());
-            
-            fetch(scriptURL, {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => console.log('Successfully logged to Google Sheets'))
-            .catch(error => console.error('Error logging to Google Sheets:', error));
-            */
-        }
-
-        // Allow Enter key to submit login form
-        usernameInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                loginButton.click();
-            }
+            // clone first element to allow smooth wrap in animation (optional)
+            const clone = container.firstElementChild.cloneNode(true);
+            container.appendChild(clone);
         });
+    }
+    populateReelContents();
+
+    // Initial UI update
+    function updateUI(){
+        balanceDisplay.textContent = idr.format(gameState.balance);
+        spinCountDisplay.textContent = gameState.spinCount;
+    }
+    updateUI();
+
+    // Add to history
+    function addToHistory(text){
+        const item = document.createElement('div');
+        item.className = 'history-item';
+        item.textContent = `[${new Date().toLocaleTimeString()}] ${text}`;
+        gameHistory.appendChild(item);
+        gameHistory.scrollTop = gameHistory.scrollHeight;
+    }
+
+    // show temporary notification (non-blocking)
+    function showNotification(text, duration = 3000){
+        notificationText.textContent = text;
+        notification.style.display = 'block';
+        setTimeout(()=> {
+            notification.style.display = 'none';
+        }, duration);
+    }
+
+    // fetch jackpot users from CSV (client-side)
+    async function loadJackpotUsersFromCSV(){
+        try{
+            const resp = await fetch(CSV_PUBLISHED_URL, {method:'GET', cache:'no-cache'});
+            if(!resp.ok) throw new Error('HTTP ' + resp.status);
+            const csv = await resp.text();
+            // simple CSV parse: assume first column contains usernames; ignore header if present
+            const lines = csv.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+            const users = [];
+            lines.forEach((line, idx) => {
+                // split by comma, take first cell
+                const cells = line.split(',');
+                // allow header detection: if header contains non-alpha maybe skip; but we'll include all
+                const name = cells[0].replace(/^"|"$/g, '').trim();
+                if(name) users.push(name);
+            });
+            // remove header if first row looks like header (e.g. contains 'username' word)
+            if(users.length && /user|username|name/i.test(users[0])) users.shift();
+            gameState.jackpotUsers = users;
+            console.log('Jackpot users loaded from CSV:', users);
+            addToHistory(`Daftar jackpot dimuat dari spreadsheet (${users.length} pengguna)`);
+        } catch(err){
+            console.warn('Gagal mengambil CSV jackpot:', err);
+            // fallback
+            gameState.jackpotUsers = FALLBACK_JACKPOT_USERS.slice();
+            addToHistory('Gagal memuat CSV — menggunakan daftar fallback.');
+        }
+    }
+
+    // Call loadJackpotUsersFromCSV on page load (so it's ready when login)
+    loadJackpotUsersFromCSV();
+
+    // Login handler
+    loginButton.addEventListener('click', () => {
+        const username = usernameInput.value.trim();
+        if(!username){ alert('Masukkan nama pengguna terlebih dahulu!'); return; }
+        gameState.username = username;
+        playerName.textContent = username;
+        loginScreen.classList.remove('active');
+        loginScreen.setAttribute('aria-hidden','true');
+        gameScreen.classList.add('active');
+        gameScreen.setAttribute('aria-hidden','false');
+
+        // determine if this user is in jackpot list (case-insensitive)
+        const lowered = username.toLowerCase();
+        const isInList = gameState.jackpotUsers.some(u => u.toLowerCase() === lowered);
+        if(isInList) addToHistory(`Selamat datang, ${username}! (USER KHUSUS — terdaftar di spreadsheet)`);
+        else addToHistory(`Selamat datang, ${username}!`);
+
+        // log to console (simulated Google Sheets logging)
+        console.log(`Login oleh ${username} pada ${new Date().toISOString()}`);
+        updateUI();
+    });
+
+    // Allow Enter to submit
+    usernameInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') loginButton.click(); });
+
+    // Spin button
+    spinButton.addEventListener('click', () => {
+        if(gameState.isAnimating) return;
+        const spinCost = 10000; // Rp10.000 per spin
+        if(gameState.balance < spinCost){
+            showNotification('Saldo tidak cukup! Silakan reset game.', 3500);
+            return;
+        }
+        gameState.balance -= spinCost;
+        gameState.spinCount++;
+        updateUI();
+        addToHistory(`Spin #${gameState.spinCount} dibayar Rp${spinCost.toLocaleString()}`);
+        // play spin sound
+        try{ spinSound.currentTime = 0; spinSound.play(); }catch(e){}
+        spinReelsAndResolve();
+    });
+
+    // Reset button
+    resetButton.addEventListener('click', () => {
+        gameState.balance = 100000;
+        gameState.spinCount = 0;
+        gameState.jackpotGivenToUser = {};
+        updateUI();
+        addToHistory(`Game direset oleh ${gameState.username || 'guest'}`);
+        hideJackpotOverlay();
+    });
+
+    // Core: spin and animate reels, then check results
+    function spinReelsAndResolve(){
+        gameState.isAnimating = true;
+        disableControls(true);
+
+        // Reset reel positions to top
+        reelContents.forEach(rc => rc.style.top = '0px');
+
+        // Determine results randomly first
+        const results = [];
+        for(let i=0;i<3;i++){
+            const idx = Math.floor(Math.random()*symbols.length);
+            results.push(symbols[idx]);
+        }
+
+        // Special rule: if user is in jackpot list AND jackpot for this username not yet given AND spinCount >= 3,
+        // force jackpot (three 7s).
+        const lowered = (gameState.username || '').toLowerCase();
+        const isSpecialUser = gameState.jackpotUsers.some(u => u.toLowerCase() === lowered);
+        if(isSpecialUser && !gameState.jackpotGivenToUser[lowered] && gameState.spinCount >= 3){
+            results[0] = '7️⃣'; results[1] = '7️⃣'; results[2] = '7️⃣';
+            // mark as given once we finalize jackpot
+        }
+
+        // animate reels visually (simple timing)
+        animateReelsToResults(results).then(()=> {
+            checkResults(results);
+            gameState.isAnimating = false;
+            disableControls(false);
+        });
+    }
+
+    // Animate reels to results — returns a Promise
+    function animateReelsToResults(results){
+        const spinDuration = 1600; // ms
+        const start = Date.now();
+        // for visual effect, each reel will stop slightly after previous
+        return new Promise(resolve => {
+            const intervals = [0, 160, 320]; // delays per reel stop
+            // Ensure each reel final position aligns symbol to top (neg multiple of 150)
+            function step(){
+                const elapsed = Date.now() - start;
+                const progress = Math.min(elapsed/spinDuration, 1);
+                const easing = 1 - Math.pow(1-progress, 3);
+
+                reelContents.forEach((reel, index) => {
+                    const offsetDelay = intervals[index];
+                    // if elapsed < delay => continue spinning quickly
+                    if(elapsed < offsetDelay){
+                        reel.style.top = `${- ( (elapsed*6) % (symbols.length*150) ) }px`;
+                    } else {
+                        const innerProgress = Math.min((elapsed - offsetDelay) / (spinDuration - offsetDelay), 1);
+                        if(innerProgress < 0.95){
+                            // slow spin
+                            reel.style.top = `${- ( (innerProgress*800) % (symbols.length*150) ) }px`;
+                        } else {
+                            // final position
+                            const finalPos = - (symbols.indexOf(results[index]) * 150);
+                            // small bounce effect
+                            const bounce = Math.round(Math.sin(innerProgress*Math.PI*2) * 6);
+                            reel.style.top = (finalPos - bounce) + 'px';
+                        }
+                    }
+                });
+
+                if(progress < 1) requestAnimationFrame(step);
+                else resolve();
+            }
+            step();
+        });
+    }
+
+    // check results and award prizes
+    function checkResults(results){
+        let winAmount = 0;
+        let message = '';
+
+        // Jackpot: three 7s
+        if(results.every(r=> r==='7️⃣')){
+            const lowered = (gameState.username || '').toLowerCase();
+            const isSpecial = gameState.jackpotUsers.some(u=> u.toLowerCase() === lowered);
+            if(isSpecial && !gameState.jackpotGivenToUser[lowered]){
+                // Big jackpot for special user — value huge (demonstration)
+                winAmount = 50000000; // Rp50.000.000 (demo amount)
+                message = `JACKPOT BESAR! Anda memenangkan ${idr.format(winAmount)}!`;
+                // show big animation and sound
+                showJackpotOverlay(winAmount);
+                try{ jackpotSound.currentTime = 0; jackpotSound.play(); }catch(e){}
+                gameState.jackpotGivenToUser[lowered] = true;
+                addToHistory(`JACKPOT BESAR untuk ${gameState.username}: ${idr.format(winAmount)}`);
+            } else {
+                // regular jackpot (for non-privileged users)
+                winAmount = 100000; // small payout
+                message = `Jackpot! Anda memenangkan ${idr.format(winAmount)}!`;
+                try{ winSound.currentTime = 0; winSound.play(); }catch(e){}
+                showNotification(message, 5000);
+                addToHistory(`Jackpot reguler: ${idr.format(winAmount)}`);
+            }
+        }
+        // three of a kind (other symbols)
+        else if(results[0]===results[1] && results[1]===results[2]){
+            winAmount = symbolValues[results[0]] * 10; // multiplier
+            message = `Tiga simbol ${results[0]}! Menang ${idr.format(winAmount)}!`;
+            try{ winSound.currentTime = 0; winSound.play(); }catch(e){}
+            showNotification(message, 4000);
+            addToHistory(`Tiga ${results[0]}: ${idr.format(winAmount)}`);
+        }
+        // two same
+        else if(results[0]===results[1] || results[1]===results[2] || results[0]===results[2]){
+            winAmount = 50000;
+            message = `Dua simbol sama! Menang ${idr.format(winAmount)}!`;
+            try{ winSound.currentTime = 0; winSound.play(); }catch(e){}
+            showNotification(message, 3000);
+            addToHistory(`Dua simbol sama: ${idr.format(winAmount)}`);
+        } else {
+            message = 'Tidak menang. Coba lagi!';
+            try{ loseSound.currentTime = 0; loseSound.play(); }catch(e){}
+            showNotification(message, 2000);
+            addToHistory(`Spin #${gameState.spinCount}: Kalah`);
+        }
+
+        gameState.balance += winAmount;
+        updateUI();
+
+        // For non-jackpot wins we show notification only; jackpot overlay already shown for special user
+        if(winAmount > 0 && !(results.every(r=>'7️⃣'===r) && gameState.jackpotUsers.some(u=>u.toLowerCase()===(gameState.username||'').toLowerCase()))) {
+            // already handled by showNotification
+        }
+    }
+
+    // show jackpot overlay with confetti
+    function showJackpotOverlay(amount){
+        jackpotAmountDisplay.textContent = idr.format(amount);
+        jackpotOverlay.classList.add('show');
+        jackpotOverlay.setAttribute('aria-hidden','false');
+
+        // create confetti pieces
+        // remove existing if any
+        Array.from(document.querySelectorAll('.confetti-piece')).forEach(n=>n.remove());
+        const count = 40;
+        for(let i=0;i<count;i++){
+            const el = document.createElement('div');
+            el.className = 'confetti-piece';
+            el.style.left = Math.random()*100 + 'vw';
+            el.style.background = `hsl(${Math.random()*360} 90% 60%)`;
+            el.style.animationDelay = (Math.random()*0.6)+'s';
+            el.style.width = (6 + Math.random()*12) + 'px';
+            el.style.height = (10 + Math.random()*24) + 'px';
+            document.body.appendChild(el);
+            // remove after animation
+            setTimeout(()=> el.remove(), 3000);
+        }
+
+        // auto-hide after a while
+        setTimeout(()=> hideJackpotOverlay(), 4500);
+    }
+
+    function hideJackpotOverlay(){
+        jackpotOverlay.classList.remove('show');
+        jackpotOverlay.setAttribute('aria-hidden','true');
+        // remove confetti pieces if any remain
+        Array.from(document.querySelectorAll('.confetti-piece')).forEach(n=>n.remove());
+    }
+
+    // enable/disable buttons while animating
+    function disableControls(disable){
+        spinButton.disabled = disable;
+        resetButton.disabled = disable;
+        if(disable) spinButton.style.opacity = '0.6'; else spinButton.style.opacity='1';
+    }
+
+    // initial fill of reel contents is done earlier
+    // but also ensure final positions show initial random symbols
+    (function initialFill(){
+        // randomly place reels at some symbol
+        reelContents.forEach((rc, idx) => {
+            const i = Math.floor(Math.random()*symbols.length);
+            rc.style.top = `${- (i * 150) }px`;
+        });
+    })();
     </script>
 </body>
 </html>
