@@ -1,0 +1,34 @@
+body {
+  margin: 0;
+  background-color: black;
+  overflow: hidden;
+  font-family: Arial, sans-serif;
+}
+
+.chat-box {
+  position: absolute;
+  bottom: 15px;
+  width: 100%;
+  text-align: center;
+  color: white;
+}
+
+#user-input {
+  width: 60%;
+  padding: 10px;
+  border-radius: 5px;
+  border: none;
+}
+#send-btn {
+  padding: 10px 15px;
+  border: none;
+  background: cyan;
+  color: black;
+  border-radius: 5px;
+}
+
+#response-output {
+  margin-bottom: 10px;
+  color: cyan;
+  text-shadow: 0 0 5px cyan;
+}
